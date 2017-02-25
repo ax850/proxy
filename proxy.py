@@ -28,24 +28,23 @@ def get_form(buffer):
 
 def threaded_client(conn):
     while True:
-        buffer = conn.recv(4096) # Recieves the cURL
-        host,check, type = get_host(buffer)
+        buffer_ = conn.recv(4096) # Recieves the cURL
+        host_,check,type_ = get_host(buffer_)
         reply = ""
         if check == "proxy":
-            if type == "get":
-                response = requests.get('http://'+host+'/get')
+            if type_ == "get":
+                response = requests.get('http://'+host_+'/get')
                 reply = response.text
-            elif type == "post":  #post
-                dic = get_form(buffer)
-                response = requests.post('http://' + host + '/post', data = dic)
+            elif type_ == "post":  #post
+                dic = get_form(buffer_) # convert form to dict type
+                response = requests.post('http://' + host_ + '/post', data = dic)
                 reply = response.text
-        elif check !="proxy":
+        elif check != "proxy":
             conn.close()
-
         print('Recieving Data From Server...')
         if not reply:
             break
-        conn.send(str(reply.encode('utf-8')) + "\n")
+        conn.send(str(reply.encode('utf-8'))) # encode to utf-8
 
 while True:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
