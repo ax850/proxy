@@ -44,10 +44,10 @@ def threaded_client(conn):
         print('Recieving Data From Server...')
         if not reply:
             break
-        conn.send(str(reply.encode('utf-8'))) # encode to utf-8
+        conn.send(str(reply.encode('utf-8'))) # must encode to utf-8 before sending
 
 while True:
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket, accepts TCP
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
     try:
         s.bind((host, int(port)))
@@ -56,4 +56,4 @@ while True:
     s.listen(5)  # Basically a que, number of incoming connections at a time
     conn, addr = s.accept()
     print('connected to:' + addr[0] + ':' + str(addr[1]))
-    start_new_thread(threaded_client, (conn,))
+    start_new_thread(threaded_client, (conn,)) # Each client has its own thread
