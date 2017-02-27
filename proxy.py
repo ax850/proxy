@@ -8,11 +8,10 @@ print("Waiting for connection...")
 
 def get_host(buffer):
     end = buffer.find('\n')
+    type = buffer[:end].split()[0].lower()
     host_request = buffer[:end].split()[1]
     check = host_request.split("/")[1]
-    type = host_request.split("/")[-1].lower()
-    host = host_request.rsplit("/", 1)[0]
-    host = host.replace("/proxy/", "")
+    host = host_request.replace("/proxy/", "")
     host = host.replace("http://", "")  # Finding the URL host
     return host, check, type
 
@@ -30,14 +29,16 @@ def threaded_client(conn):
     while True:
         buffer_ = conn.recv(4096) # Recieves the cURL
         host_,check,type_ = get_host(buffer_)
+        print(type_)
         reply = ""
         if check == "proxy":
             if type_ == "get":
-                response = requests.get('http://'+host_+'/get')
+                print(type_)
+                response = requests.get('http://'+host_)
                 reply = response.text
             elif type_ == "post":  #post
                 dic = get_form(buffer_) # convert form to dict type
-                response = requests.post('http://' + host_ + '/post', data = dic)
+                response = requests.post('http://' + host_, data = dic)
                 reply = response.text
         elif check != "proxy":
             conn.close()
@@ -45,6 +46,7 @@ def threaded_client(conn):
         if not reply:
             break
         conn.send(str(reply.encode('utf-8'))) # must encode to utf-8 before sending
+        conn.close()
 
 while True:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket, accepts TCP
